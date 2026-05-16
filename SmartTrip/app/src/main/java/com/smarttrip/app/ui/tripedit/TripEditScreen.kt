@@ -293,8 +293,6 @@ private fun DestinationCard(
     onMoveDown: () -> Unit,
     onDelete: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)

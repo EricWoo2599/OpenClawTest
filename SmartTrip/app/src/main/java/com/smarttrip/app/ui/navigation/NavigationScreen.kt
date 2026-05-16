@@ -221,8 +221,6 @@ private fun DestinationTimelineItem(
     segmentIndex: Int?,
     onSegmentClick: (Int) -> Unit = {}
 ) {
-    val context = LocalContext.current
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
