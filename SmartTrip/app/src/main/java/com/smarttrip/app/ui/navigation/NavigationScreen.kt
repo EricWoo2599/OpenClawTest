@@ -1,8 +1,6 @@
 package com.smarttrip.app.ui.navigation
 
-import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -206,20 +204,11 @@ private fun DestinationTimelineItem(
     index: Int,
     isFirst: Boolean,
     isLast: Boolean,
-    segmentIndex: Int?
+    @Suppress("UNUSED_PARAMETER") segmentIndex: Int?
 ) {
-    val context = LocalContext.current
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = segmentIndex != null) {
-                segmentIndex?.let { idx ->
-                    val trip = (context as? android.content.Context)?.let {
-                        // This is a simplified version; in real app, we'd need access to trip data
-                    }
-                }
-            }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
     ) {

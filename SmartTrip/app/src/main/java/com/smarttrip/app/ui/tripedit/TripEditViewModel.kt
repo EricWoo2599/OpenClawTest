@@ -134,6 +134,12 @@ class TripEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         }
     }
 
+    fun onAddDestination() {
+        val destinations = _uiState.value.destinations.toMutableList()
+        destinations.add(Destination(name = "新目的地"))
+        _uiState.value = _uiState.value.copy(destinations = destinations)
+    }
+
     fun onSaveTrip() {
         val currentState = _uiState.value
         val trip = currentState.trip ?: return

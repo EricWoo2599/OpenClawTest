@@ -151,11 +151,28 @@ fun TripEditScreen(
             }
 
             item {
-                Text(
-                    text = "目的地列表 (${uiState.destinations.size})",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "目的地列表 (${uiState.destinations.size})",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(
+                        onClick = { viewModel.onAddDestination() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("添加")
+                    }
+                }
             }
 
             if (uiState.destinations.isEmpty()) {
@@ -207,8 +224,6 @@ private fun DestinationCard(
     onMoveDown: () -> Unit,
     onDelete: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
