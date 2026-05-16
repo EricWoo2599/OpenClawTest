@@ -26,7 +26,6 @@ import com.smarttrip.app.ui.triplist.TripListViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        com.smarttrip.app.repository.TripRepository.init(this)
         setContent {
             SmartTripTheme {
                 Surface(

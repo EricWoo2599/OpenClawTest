@@ -1,10 +1,6 @@
 package com.smarttrip.app.ui.tripedit
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.smarttrip.app.model.Destination
 import com.smarttrip.app.model.TransportMode
 
@@ -33,61 +28,6 @@ fun TripEditScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    
-    // 语音识别权限请求
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Toast.makeText(context, "录音权限已授予", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "需要录音权限才能使用语音输入", Toast.LENGTH_SHORT).show()
-        }
-    }
-    
-    // 语音识别启动器
-    val speechRecognizerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val data = result.data
-        if (data != null) {
-            val results = data.getStringArrayListExtra(
-                android.speech.RecognizerIntent.EXTRA_RESULTS
-            )
-            if (results != null && results.isNotEmpty()) {
-                viewModel.onInputTextChange(results[0])
-            }
-        }
-    }
-    
-    fun startVoiceInput() {
-        val permissionCheck = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.RECORD_AUDIO
-        )
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            return
-        }
-        
-        val intent = android.content.Intent(
-            android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH
-        ).apply {
-            putExtra(
-                android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-            )
-            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
-            putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, "请说出目的地")
-        }
-        try {
-            speechRecognizerLauncher.launch(
-                android.content.Intent.createChooser(intent, "语音输入")
-            )
-        } catch (e: Exception) {
-            Toast.makeText(context, "设备不支持语音识别", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -190,46 +130,21 @@ fun TripEditScreen(
                         OutlinedTextField(
                             value = uiState.inputText,
                             onValueChange = { viewModel.onInputTextChange(it) },
-                            label = { Text("粘贴文本或使用语音输入") },
+                            label = { Text("粘贴文本") },
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 2,
                             maxLines = 4,
-                            shape = RoundedCornerShape(8.dp),
-                            trailingIcon = {
-                                IconButton(onClick = { startVoiceInput() }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Mic,
-                                        contentDescription = "语音输入"
-                                    )
-                                }
-                            }
+                            shape = RoundedCornerShape(8.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Row(
+                        Button(
+                            onClick = { viewModel.onParseInput() },
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            shape = RoundedCornerShape(8.dp)
                         ) {
-                            Button(
-                                onClick = { startVoiceInput() },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                Icon(Icons.Default.Mic, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("语音输入")
-                            }
-                            Button(
-                                onClick = { viewModel.onParseInput() },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("智能识别")
-                            }
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("智能识别")
                         }
                     }
                 }
@@ -280,7 +195,6 @@ fun TripEditScreen(
     }
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun DestinationCard(
     index: Int,
@@ -308,18 +222,17 @@ private fun DestinationCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(32.dp)
                         .background(
                             destination.transportMode.color,
-                            RoundedCornerShape(20.dp)
+                            RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${index + 1}",
                         color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -342,32 +255,8 @@ private fun DestinationCard(
                     FilterChip(
                         selected = destination.transportMode == mode,
                         onClick = { onTransportModeChange(mode) },
-                        label = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(
-                                    imageVector = mode.icon,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                    tint = if (destination.transportMode == mode) Color.White else mode.color
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(mode.emoji, style = MaterialTheme.typography.bodyLarge)
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = if (destination.transportMode == mode) {
-                            FilterChipDefaults.filterChipColors(
-                                containerColor = mode.color,
-                                labelColor = Color.White,
-                                iconColor = Color.White
-                            )
-                        } else {
-                            FilterChipDefaults.filterChipColors()
-                        }
+                        label = { Text(mode.emoji, style = MaterialTheme.typography.bodySmall) },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
