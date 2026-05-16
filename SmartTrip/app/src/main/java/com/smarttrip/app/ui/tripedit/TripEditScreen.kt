@@ -270,8 +270,15 @@ private fun DestinationCard(
                     FilterChip(
                         selected = destination.transportMode == mode,
                         onClick = { onTransportModeChange(mode) },
-                        label = { Text(mode.emoji, style = MaterialTheme.typography.bodySmall) },
-                        modifier = Modifier.weight(1f)
+                        label = { 
+                            Text(
+                                mode.emoji, 
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontSize = androidx.compose.ui.unit.TextUnit(24f, androidx.compose.ui.unit.TextUnitType.Sp)
+                            ) 
+                        },
+                        modifier = Modifier.weight(1f),
+                        leadingIcon = null
                     )
                 }
             }

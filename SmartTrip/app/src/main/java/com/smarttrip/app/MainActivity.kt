@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.smarttrip.app.repository.TripRepository
 import com.smarttrip.app.ui.navigation.NavigationScreen
 import com.smarttrip.app.ui.navigation.NavigationViewModel
 import com.smarttrip.app.ui.navigation.Screen
@@ -26,6 +27,7 @@ import com.smarttrip.app.ui.triplist.TripListViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        TripRepository.init(applicationContext)
         setContent {
             SmartTripTheme {
                 Surface(
@@ -58,7 +60,7 @@ fun SmartTripApp() {
                     navController.navigate(Screen.Navigation.createRoute(tripId))
                 },
                 onNavigateToCreate = {
-                    val tripId = com.smarttrip.app.repository.TripRepository.createTrip("新行程").id
+                    val tripId = TripRepository.createTrip("新行程").id
                     navController.navigate(Screen.TripEdit.createRoute(tripId))
                 }
             )
