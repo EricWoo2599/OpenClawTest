@@ -32,7 +32,9 @@ fun TripEditScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                TripEditEvent.NavigateBack -> onNavigateBack()
+                TripEditEvent.NavigateBack -> {
+                    onNavigateBack()
+                }
                 is TripEditEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }

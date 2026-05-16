@@ -141,14 +141,14 @@ class TripEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     }
 
     fun onSaveTrip() {
-        val currentState = _uiState.value
-        val trip = currentState.trip ?: return
-        val updatedTrip = trip.copy(
-            name = currentState.tripName.ifBlank { "未命名行程" },
-            destinations = currentState.destinations
-        )
-        TripRepository.updateTrip(updatedTrip)
         viewModelScope.launch {
+            val currentState = _uiState.value
+            val currentTrip = currentState.trip ?: return@launch
+            val updatedTrip = currentTrip.copy(
+                name = currentState.tripName.ifBlank { "未命名行程" },
+                destinations = currentState.destinations
+            )
+            TripRepository.updateTrip(updatedTrip)
             _events.emit(TripEditEvent.ShowToast("保存成功"))
             _events.emit(TripEditEvent.NavigateBack)
         }

@@ -1,6 +1,7 @@
 package com.smarttrip.app.ui.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -91,12 +92,18 @@ fun NavigationScreen(
                 }
 
                 itemsIndexed(trip.destinations) { index, destination ->
+                    val segmentIndex = if (index < trip.destinations.size - 1) index else null
                     DestinationTimelineItem(
                         destination = destination,
                         index = index,
                         isFirst = index == 0,
                         isLast = index == trip.destinations.size - 1,
-                        segmentIndex = if (index < trip.destinations.size - 1) index else null
+                        segmentIndex = segmentIndex,
+                        onSegmentClick = {
+                            if (segmentIndex != null) {
+                                viewModel.onSegmentClick(segmentIndex)
+                            }
+                        }
                     )
                 }
 
@@ -121,7 +128,7 @@ fun NavigationScreen(
                     ) {
                         Icon(Icons.Default.Navigation, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("开始导航")
+                        Text("从起点开始导航")
                     }
                 }
             }
@@ -194,6 +201,71 @@ private fun TripOverviewCard(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            // 行程预览图 - 简化版路线
+            if (trip.destinations.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.2f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        Text(
+                            text = "路线预览",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            trip.destinations.take(5).forEachIndexed { i, dest ->
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(CircleShape)
+                                            .background(if (i == 0) Color.Green else if (i == trip.destinations.size - 1) Color.Red else Color.White),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "${i + 1}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = if (i == 0 || i == trip.destinations.size - 1) Color.White else BluePrimary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Text(
+                                        text = dest.name.take(3),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.White.copy(alpha = 0.9f),
+                                        maxLines = 1
+                                    )
+                                }
+                                if (i < trip.destinations.take(5).size - 1) {
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(20.dp)
+                                            .height(2.dp)
+                                            .background(Color.White.copy(alpha = 0.7f))
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -204,12 +276,11 @@ private fun DestinationTimelineItem(
     index: Int,
     isFirst: Boolean,
     isLast: Boolean,
-    @Suppress("UNUSED_PARAMETER") segmentIndex: Int?
+    segmentIndex: Int?,
+    onSegmentClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         Column(
@@ -257,8 +328,14 @@ private fun DestinationTimelineItem(
         Card(
             modifier = Modifier
                 .weight(1f)
-                .padding(bottom = if (!isLast) 8.dp else 0.dp),
-            shape = RoundedCornerShape(12.dp)
+                .padding(bottom = if (!isLast) 8.dp else 0.dp)
+                .then(
+                    if (!isLast) Modifier.clickable(onClick = onSegmentClick) else Modifier
+                ),
+            shape = RoundedCornerShape(12.dp),
+            colors = if (!isLast) CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ) else CardDefaults.cardColors()
         ) {
             Column(
                 modifier = Modifier.padding(12.dp)
@@ -304,6 +381,33 @@ private fun DestinationTimelineItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
+                    }
+                }
+
+                if (!isLast) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = onSegmentClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Navigation,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "从此处开始",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
             }
